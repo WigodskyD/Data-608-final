@@ -54,7 +54,7 @@ trace=dict(
 
 #py.plot([trace], filename='NYC_map')
 
-mapbox_access_token = 'pk.eyJ1IjoiZGFud2lnIiwiYSI6ImNqcDdvamp0dTB2cmYza3FzeDN3ZW05OGEifQ.OzM_HzpiAcFeJLb21l2xPA'
+mapbox_access_token = 'your token belongs here'
 
 #The following returns a Plotly plot.  It can filter the data and create a separate graph on Plotly's
 #site.  It is not callable within an html page.  The live graphs will be called from a JavaScript JQuery function.
