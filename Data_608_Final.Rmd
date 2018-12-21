@@ -1,0 +1,138 @@
+---
+title: "Data_608_Final"
+author: "Dan Wigodsky"
+date: "November 30, 2018"
+output: html_document
+---
+
+###This file was used to scrape XML data from New York City, saved on the local computer.  A final, clean version is produced and saved to github at https://github.com/WigodskyD/data-sets/blob/master/NYC_Map_Data.csv
+
+```{r setup, include=FALSE}
+#library(RCurl)
+library(xml2)
+#library(jsonlite)
+#library(rvest)
+library(ggplot2)
+library(knitr)
+library(stringr)
+```
+
+```{r}
+xml_file<-read_xml("C:/Users/dawig/Desktop/Data608/Interactive_Map_Data.xml")
+#xml_children(xml_children(xml_file)[1])
+#xml_children(xml_children(xml_file)[2])
+#xml_children(xml_children(xml_file)[3])
+#xml_children(xml_children(xml_file)[4])
+#xml_children(xml_children(xml_file)[5])
+#xml_children(xml_children(xml_file)[6])
+#xml_children(xml_children(xml_file)[7])
+some_text<-xml_children(xml_children(xml_file)[4])[12]
+
+some_text[1]
+movies_list<-as_list( xml_children(xml_children(xml_file)[5])[1])
+str(as_list( xml_children(xml_children(xml_file)[5])[1]))
+
+#lapply(movies_list, attributes)
+movies_list2<-as_list(xml_children(xml_children(xml_file)[5]))
+#xml_structure(xml_children(xml_children(xml_file)[5]))
+xml_children(xml_children(xml_children(xml_file)[5])[[2]])
+#movies_list2[2][1][1][1]
+#str(movies_list2[2][1][1])
+#str(movies_list2[2])
+#xml_text(xml_children(xml_children(xml_children(xml_file)[5])[[2]])[22])
+#xml_text(xml_children(xml_children(xml_children(xml_file)[5])[[2]])[220])
+#xml_text(xml_children(xml_children(xml_children(xml_file)[5])[[2]])[22])
+#xml_text(xml_children(xml_children(xml_children(xml_file)[5])[[2]])[230])
+#xml_text(xml_children(xml_children(xml_children(xml_file)[5])[[2]])[250])
+#xml_text(xml_children(xml_children(xml_children(xml_file)[5])[[2]])[254])
+#str(movies_list2)
+movies_names<-rep('a',233)
+movies_director<-rep('a',233)
+movies_year<-rep('a',233)
+movies_lat<-rep('a',233)
+movies_long<-rep('a',233)
+movies_imdb<-rep('a',233)
+for (i in 22:254){
+  movies_names[i-21]<-xml_text(xml_children(xml_children(xml_children(xml_file)[5])[[2]])[i])
+  movies_year[i-21]<-str_extract(movies_names[i-21],"(\\d{4})")
+}
+movies_names[2]
+movies_names[13]
+movies_names[20]
+movies_names[55]
+movies_names[141]
+movies_names[145]
+movies_names[188]
+movies_names[167]
+movies_year[3]<-2004
+for(i in c(1:119,121:140,142:145,147:233)){
+     movies_lat[i]<-unlist(str_split(movies_names[i], movies_year[i]))[2]
+     movies_names[i]<-unlist(str_split(movies_names[i], movies_year[i]))[1]
+}
+     movies_lat[120]<-unlist(str_split(movies_names[120], "Courtesy"))[2]
+     movies_lat[146]<-unlist(str_split(movies_names[146], "Courtesy"))[2]
+     movies_lat[141]<-unlist(str_split(movies_names[141], "Courtesy"))[2]
+     movies_names[141]<-"Serpico"
+     movies_names[120]<-"Nighthawks1981"
+     movies_names[146]<-"Shaft2000"
+
+for(i in c(1:30,32:94,97,99:141,144:203,205:233)){
+     movies_director[i]<-unlist(str_split(movies_lat[i], "Directed by"))[2]
+     movies_director[i]<-unlist(str_split(movies_director[i],"http"))[1]
+}
+
+for(i in c(31,95,96,98,142,143,204)){
+     movies_director[i]<-unlist(str_split(movies_lat[i], "Created by"))[2]
+     movies_director[i]<-unlist(str_split(movies_director[i],"http"))[1]
+}
+for(i in 1:233){
+     movies_imdb[i]<-movies_lat[i]
+     movies_lat[i]<-unlist(str_split(movies_lat[i], '40\\.'))[2]
+     movies_long[i]<-unlist(str_split(movies_lat[i], '-'))[2]
+     movies_lat[i]<-unlist(str_split(movies_lat[i], '-'))[1]
+     movies_lat[i]<-as.numeric(paste0('40.',movies_lat[i]))
+}
+
+for(i in 1:233){
+     movies_long[i]<-unlist(str_split(movies_long[i],"([:alpha:])"))[1]
+     movies_long[i]<-as.numeric(paste0('-',movies_long[i]))
+}
+ movies_imdb[11]
+  movies_imdb[22]
+   movies_imdb[33]
+for(i in 1:233){
+     movies_imdb[i]<-unlist(str_split(movies_imdb[i],"imdb.com\\/ti"))[2]
+     movies_imdb[i]<-unlist(str_split(movies_imdb[i],"\\/"))[2]
+     movies_imdb[i]<-paste0('imdb.com/title/',movies_imdb[i])
+}
+
+movies_matrix<-as.matrix(cbind(movies_names,movies_director,movies_year,movies_lat,movies_long,movies_imdb))
+movies_matrix<-gsub('"','',movies_matrix)
+movies_matrix<-noquote(movies_matrix)
+head(movies_matrix)
+#write.csv(movies_matrix,"C:/Users/dawig/Desktop/Data608/NYC_Map_Data.csv")
+```
+
+
+```{r get genre}
+genre_set<-matrix(rep('a',233))
+for (i in 161:233){
+imdb_page<-movies_matrix[i,6]
+imdb_page<-paste0("https://",imdb_page)
+print(imdb_page)
+genre_html<-read_html(imdb_page)
+xml_children(genre_html)
+genre_html<-xml_text(genre_html)
+genre_string<-unlist(str_split(genre_html,'genre'))
+genre_set[i]<-unlist(str_split(genre_string[2],"contentRating"))[1]
+genre_set[i]<-str_c(str_replace_all(genre_set[i],'\n',''))
+genre_set[i]<-str_replace_all(str_extract_all(genre_set[i],"[:alpha:]+"),'"','')
+}
+
+write.csv(genre_set,"C:/Users/dawig/Desktop/Data608/NYC_Map_Data_g.csv")
+```
+genre_html<-xml_text(xml_children(genre_html))
+split_genre<-str_split(genre_html,'application\\/ld\\+json')
+str(split_genre)
+#imdb_page
+split_genre[2]
