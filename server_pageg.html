@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+
+<!--This file contains the webpage content to view movie shooting locations throughout the New York Metro Area.  It contains: HTML grid plan,  in-line CSS, scripts, html page items.  The scripts are mostly JQuery functions returning new map items and other items after sending requests to the the Flask server. Divs are also filled with information or deleted based on actions of the functions.  The webpage is available at http://nyc-movie-filming-locations.herokuapp.com/  -->
+<html>
+<meta charset="utf-8"/>
+<style>
+.item1 { grid-column-start: one;grid-column-end: five;grid-row-start: A;grid-row-end: B; }
+.item2 { grid-column-start: one;grid-column-end: two;grid-row-start: B;grid-row-end: D; }
+.item3 { grid-column-start: two;grid-column-end: twob;grid-row-start: B;grid-row-end: C; }
+.item3b { grid-column-start: twob;grid-column-end: three;grid-row-start: B;grid-row-end: C; }
+.item4 { grid-column-start: two;grid-column-end: three;grid-row-start: C;grid-row-end: D; }
+.item5 { grid-column-start: three;grid-column-end: four;grid-row-start: B;grid-row-end: D; }
+.item6 { grid-column-start: one;grid-column-end: five;grid-row-start: D;grid-row-end: E; }
+.item7 { grid-column-start: four;grid-column-end: five;grid-row-start: B;grid-row-end: D; }
+.grid-container {
+  display: grid;
+  grid-template-columns: [one] 125px [two] 485px [twob] 205px [three] 600px [four] 400px [five] ;
+  grid-template-rows: [A] 80px [B] 55px [C] 630px [D] 60px [E];
+  grid-gap: 10px;
+  background-color: cornsilk;
+  padding: 10px;
+}
+.grid-container > div {
+  background: linear-gradient(to bottom right, #f5f5f5 15%, wheat 90%);
+  font-size: 14px;
+}
+
+#textarea
+                  {
+                  top: 5px;
+                  margin-bottom:155px;
+                  left:5px;
+                  right:5px;
+                  max-height: 100%;
+                  max-width: 90%;
+                  background-color: orange;
+                  border-color: red;}
+#item6        {
+                  font-size: 16px;
+                                }
+.border {border-width: 10px;
+         margin-left: -10px;
+         margin-right: 10px; 
+         border-style: solid; 
+         border-color: CadetBlue;   
+         object-fit: fill;
+         border-radius:15px}
+
+.borderb {border-width: 10px;
+         margin-left: 0px;
+         margin-right: 0px;
+         margin-bottom: 0px; 
+         border-style: solid; 
+         border-color: CadetBlue;   
+         object-fit: fill;
+         border-radius:15px}
+
+/* Slider CSS comes from an online tutorial, but is modified. */
+.slider {
+  -webkit-appearance: none;  /* Override default CSS styles */
+  appearance: none;
+  width: 460px; /* Full-width */
+  height: 18px; /* Specified height */
+  background: moccasin; 
+  border-radius: 12px;
+  outline: none; /* Remove outline */
+  opacity: 0.6; /* Set transparency (for mouse-over effects on hover) */
+  -webkit-transition: .2s; /* 0.2 seconds transition on hover */
+  transition: opacity .2s;
+}
+
+.slider::-moz-range-thumb {
+  width: 18px; /* Set a specific slider handle width */
+  height: 42px; /* Slider handle height */
+  border-color: cadetblue;
+  border-width: 4px;
+  border-radius: 22px;
+  background: lightcyan; /* Green background */
+  cursor: pointer; /* Cursor on hover */
+}
+.button {
+  background-color: cadetblue;
+  color: white;
+  padding: 15px 32px;
+  text-align: center;
+  display: inline-block;
+  font-size: 22px;
+  border-width: 10px;
+  border-style: solid; 
+  border-color: CadetBlue;     
+  border-radius:15px;
+  margin-top:5px;
+  margin-bottom:5px;
+}
+.button2 {
+  background-color: white;
+  color: cadetblue;
+  padding: 5px 5px;
+  text-align: center;
+  font-size: 22px;
+  border-width: 3px;
+  border-style: solid; 
+  border-color: mediumturquoise;     
+  border-radius:15px
+}
+
+
+
+</style>
+<head>
+
+
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+<script>
+//create original map on loading
+$(document).ready(function(){
+             setTimeout(function() {$('#welcome1').replaceWith('<p></p>')}, 5500);
+             setTimeout( function(){$('#welcome3').replaceWith('<p></p>');}, 11000);
+             setTimeout(function(){$('#welcome2').replaceWith('<p></p>');}, 16500);
+             setTimeout(function(){$('#welcome4').replaceWith('<p></p>');}, 22000);
+             var movies_names = [];
+             var movies_long = [];
+             var movies_lat = [];
+             var choices_in = {passed_genre: "", passed_decade: 0};
+     $.getJSON( "/_background_process", choices_in, function( data ) {
+            movies_names.push(data.movies_names);
+            movies_long.push(data.movies_long);
+            movies_lat.push(data.movies_lat);
+              PlotlyGraph();
+        });
+    
+   function PlotlyGraph(){
+             var zoom_passed = 10;
+      Plotly.newPlot("graph",[{
+            type:'scattermapbox',
+              lat: Object.values(movies_lat[0]),
+              lon: Object.values(movies_long[0]),
+              mode: 'markers',
+              marker: {size:9, color:'cadetblue'},
+              text: Object.values(movies_names[0])
+            }], {
+               height: 610,
+               width: 680,
+               mapbox: {
+                 center: {
+                   lat: 40.7136,
+                   lon: -74
+                 },
+                pitch: 0,
+                zoom: zoom_passed, 
+              },
+ margin:{r:0,l:0,t:0,b:0}
+            }, {
+              mapboxAccessToken: 'pk.eyJ1IjoiZGFud2lnIiwiYSI6ImNqcDdvamp0dTB2cmYza3FzeDN3ZW05OGEifQ.OzM_HzpiAcFeJLb21l2xPA'
+                });
+              };
+
+           });
+
+//genre button function to filter map
+$(document).ready(function(){
+          $('input[type=radio][name="genre"]').change(function(event)  {
+             event.preventDefault();
+             welcome_remover();
+          $('#graph').replaceWith('<div id="graph" class="borderb"></div>')
+             var movies_names = [];
+             var movies_long = [];
+             var movies_lat = [];
+             var movie_genre = $("input[name='genre']:checked").val();
+             console.log(movie_genre);
+             var decade = document.getElementById('result2').innerHTML;
+             var choices_in = {passed_genre: movie_genre, passed_decade: decade};
+     $.getJSON( "/_background_process", choices_in, function( data ) {
+            movies_names.push(data.movies_names);
+            movies_long.push(data.movies_long);
+            movies_lat.push(data.movies_lat);
+              PlotlyGraph();
+        });
+    
+   function PlotlyGraph(){
+             var zoom_passed = 11;
+             document.getElementById('result').innerHTML = movie_genre;
+      Plotly.newPlot("graph",[{
+            type:'scattermapbox',
+              lat: Object.values(movies_lat[0]),
+              lon: Object.values(movies_long[0]),
+              mode: 'markers',
+              marker: {size:14, color:'cadetblue'},
+              text: Object.values(movies_names[0])
+            }], {
+               title: "Movie Location Tour",
+               height: 610,
+               width: 680,
+               mapbox: {
+                 center: {
+                   lat: 40.7336,
+                   lon: -74
+                 },
+                pitch: 0,
+                zoom: zoom_passed
+              },
+ margin:{r:0,l:0,t:0,b:0}
+            }, {
+              mapboxAccessToken: 'pk.eyJ1IjoiZGFud2lnIiwiYSI6ImNqcDdvamp0dTB2cmYza3FzeDN3ZW05OGEifQ.OzM_HzpiAcFeJLb21l2xPA'
+                });
+              };
+
+           });
+});
+
+//decade button function to filter map
+$(document).ready(function(){
+          $('input[id="decade_choose"]').change(function(event)  {
+             event.preventDefault();
+             welcome_remover();
+             var movies_names = [];
+             var movies_long = [];
+             var movies_lat = [];
+             var movie_genre = document.getElementById('result').innerHTML;
+             var decade = $("input[id='decade_choose']").val();
+             console.log(decade);
+             var choices_in = {passed_genre: movie_genre, passed_decade: decade};
+     $.getJSON( "/_background_process", choices_in, function( data ) {
+            movies_names.push(data.movies_names);
+            movies_long.push(data.movies_long);
+            movies_lat.push(data.movies_lat);
+              PlotlyGraph();
+        });
+    
+   function PlotlyGraph(){
+             var zoom_passed = 11;
+             document.getElementById('result2').innerHTML = decade;
+             document.getElementById('decade_text').innerHTML = decade;
+      Plotly.newPlot("graph",[{
+            type:'scattermapbox',
+              lat: Object.values(movies_lat[0]),
+              lon: Object.values(movies_long[0]),
+              mode: 'markers',
+              marker: {size:14, color:'cadetblue'},
+              text: Object.values(movies_names[0])
+            }], {
+               title: "Movie Location Tour",
+               height: 610,
+               width: 680,
+               mapbox: {
+                 center: {
+                   lat: 40.7336,
+                   lon: -74
+                 },
+                pitch: 0,
+                 zoom: zoom_passed
+              },
+ margin:{r:0,l:0,t:0,b:0}
+            }, {
+              mapboxAccessToken: 'pk.eyJ1IjoiZGFud2lnIiwiYSI6ImNqcDdvamp0dTB2cmYza3FzeDN3ZW05OGEifQ.OzM_HzpiAcFeJLb21l2xPA'
+                });
+              };
+
+           });
+});
+
+//bring up second map colored by genre
+$(function(){
+    $('#comparison').bind('click', function(){
+        $('#second_plotly').replaceWith('<iframe id= "second_plotly" width="580" height="675"   class="borderb" scrolling="no" src="//plot.ly/~DanWig/46.embed"></iframe>');
+        welcome_remover();
+    });
+});
+//bring up 1980s walk
+$(function(){
+    $('#eightieswalk').bind('click', function(){
+        $('#graph').replaceWith('<iframe id= "graph" width="680" height="610"   class="borderb" scrolling="no" src="//plot.ly/~DanWig/48.embed"></iframe>');
+        $('#second_plotly').replaceWith('<p id= "second_plotly"></p>');
+        document.getElementById('walkstep1').innerHTML = "Big";
+        document.getElementById('walkstep2').innerHTML = "Arthur";
+        document.getElementById('walkstep3').innerHTML = "Crocodile Dundee";
+        document.getElementById('walkstep4').innerHTML = "Fame &emsp; off 6th Ave.";
+        document.getElementById('walkstep5').innerHTML = "Godzilla";
+        document.getElementById('walkstep6').innerHTML = "Tootsie";
+        document.getElementById('walkstep7').innerHTML = "Fame &emsp; &emsp; 10th Ave";
+        document.getElementById('walkstep8').innerHTML = "Ghostbusters &emsp; 59th";
+        document.getElementById('walkstep9').innerHTML = "Ghostbusters &emsp; 66th";
+        document.getElementById('walkstep10').innerHTML = "The Pickup Artist";
+        welcome_remover();
+    });
+ });
+//bring up classics walk
+$(function(){
+    $('#classicswalk').bind('click', function(){
+
+
+$('#graph').replaceWith('<iframe id= "graph" width="680" height="610"   class="borderb" scrolling="no" src="https://www.squarechapel.co.uk/wp-content/uploads/2016/09/12-Angry-Men.jpg"></iframe>');
+setTimeout(function() {$('#graph').replaceWith('<iframe id= "graph" width="680" height="610"   class="borderb" scrolling="no" src="//plot.ly/~DanWig/50.embed"></iframe>')}, 4500);
+        $('#second_plotly').replaceWith('<p id= "second_plotly"></p>');
+        document.getElementById('walkstep1').innerHTML = "The Wiz";
+        document.getElementById('walkstep2').innerHTML = "12 Angry Men";
+        document.getElementById('walkstep3').innerHTML = "On The Town";
+        document.getElementById('walkstep4').innerHTML = "No Way to Treat a Lady";
+        document.getElementById('walkstep5').innerHTML = "The Godfather Part II";
+        document.getElementById('walkstep6').innerHTML = "Taxi Driver";
+        document.getElementById('walkstep7').innerHTML = "Barefoot in the Park";
+        document.getElementById('walkstep8').innerHTML = "Next Stop, Greenwich Village";
+        document.getElementById('walkstep9').innerHTML = "Barefoot in the Park";
+        document.getElementById('walkstep10').innerHTML = "photo: https://www.squarechapel.co.uk/wp-content/uploads/2016/09/12-Angry-Men.jpg";
+
+        welcome_remover();
+    });
+ });
+
+//reload the page back to original settings
+$(function(){
+    $('#reset_button').bind('click', function(){
+              location.reload();
+    });
+ });
+
+
+//This removes the divs from the welcome when called from another function.
+function welcome_remover()   {
+              $('#welcome1').replaceWith('<p></p>');
+              $('#welcome2').replaceWith('<p></p>');
+              $('#welcome3').replaceWith('<p></p>');
+              $('#welcome4').replaceWith('<p></p>');
+}
+
+</script>
+</head>
+<body>
+<body style= "background: linear-gradient(60deg, whitesmoke 23%, transparent 43%) 3px 0, linear-gradient(3deg, transparent 19%, ivory 78%), linen;background-size: 8px 5px;">
+
+
+<div class="grid-container">
+<!--header-->
+  <div class="item1" style="background: linear-gradient(60deg, gainsboro 13%, transparent 43%) 3px 0, linear-gradient(3deg, transparent 19%, ivory 78%), linen;background-size: 8px 5px;font-size: 40px"><h2 style="color:dimgray;margin-top:0px;">New York Movie Tour</h2></div>
+<!--radio buttons-->
+  <div class="item2">
+    <div>
+	<form id="genre">
+		  <input type="radio" name="genre" value="Action">action<br>
+		  <input type="radio" name="genre" value="Adventure">adventure<br>
+                  <input type="radio" name="genre" value="Biography">biography<br>
+		  <input type="radio" name="genre" value="Comedy">comedy<br>
+                  <input type="radio" name="genre" value="Crime">crime<br>
+		  <input type="radio" name="genre" value="Documentary">documentary<br>
+                  <input type="radio" name="genre" value="Drama">drama<br>
+		  <input type="radio" name="genre" value="Family">family<br>
+                  <input type="radio" name="genre" value="Fantasy">fantasy<br>
+		  <input type="radio" name="genre" value="Film Noir">film noir<br>
+                  <input type="radio" name="genre" value="Horror">horror<br>
+		  <input type="radio" name="genre" value="Musical">musical<br>
+                  <input type="radio" name="genre" value="Mystery">mystery<br>
+		  <input type="radio" name="genre" value="Romance">romance<br>
+                  <input type="radio" name="genre" value="Sci-Fi">sci fi<br>
+		  <input type="radio" name="genre" value="Short">short<br>
+                  <input type="radio" name="genre" value="Sport">sport<br>
+		  <input type="radio" name="genre" value="Thriller">thriller<br>
+                  <input type="radio" name="genre" value="Western">western
+	</form>
+    </div>
+  </div>
+<!--slider-->
+  <div class="item3">
+    <div>
+        <div class="slidecontainer" align="center">
+            <input type="range" min="1940" max="2000" step="10" class="slider" style="margin-top:17px" id="decade_choose">
+        </div>
+    </div>
+  </div>
+<!--slider number-->
+  <div class="item3b">
+      <div>
+          <p id=decade_text style="color:CadetBlue; margin-top:15px; margin-left:25px; margin-bottom:-5px; font-size: 28px" >All Decades</p>
+      </div>
+  </div>  
+<!--primary graph-->
+  <div class="item4">
+            <div>
+                 <div id="graph" class="borderb"></div>
+            </div>
+  </div>
+<!--welcome, movie list and secondary graph-->
+  <div class="item5">
+    <p id= "second_plotly"></p>
+    <p id= "welcome1" class="button2">Welcome to the New York Movie Tour!</p>
+    <p id= "welcome2" class="button2">Choose a tour on the right.</p>
+    <p id= "welcome3" class="button2">Use a button to choose a genre to filter on the left.</p>
+    <p id= "welcome4" class="button2">Use the slider at top left to filter by decade.</p>
+
+    <p id= "walkstep1" class="button2"></p>
+    <p id= "walkstep2" class="button2"></p>
+    <p id= "walkstep3" class="button2"></p>
+    <p id= "walkstep4" class="button2"></p>
+    <p id= "walkstep5" class="button2"></p>
+    <p id= "walkstep6" class="button2"></p>
+    <p id= "walkstep7" class="button2"></p>
+    <p id= "walkstep8" class="button2"></p>
+    <p id= "walkstep9" class="button2"></p>
+    <p id= "walkstep10" class="button2"></p>
+
+</div>
+<!--footer-->
+  <div class="item6">
+    <p id=copyright style="color:silver">Copyright 2018 Dan Wigodsky<p>
+    <p id=result style="color:white">...</p>
+    <p id=result2 style="color:white">0</p>
+  </div>
+<!--learn more about the data-->
+  <div class="item7">
+    <a id="comparison"><button  class='button'>view genre comparison map</button></a> 
+    <a id="eightieswalk"><button  class='button'>view 1980s midtown walk</button></a> 
+    <a id="classicswalk"><button  class='button'>view classics village walk</button></a> 
+    <a id="reset_button"><button  class='button'>reset graphs</button></a> 
+  </div>
+</div>
+
+
+
+</body>
+</html>
